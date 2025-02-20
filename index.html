@@ -1,11 +1,474 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projet Musée</title>
+    <title>🏛️ Musée Moderne</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        /* Variables CSS */
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --accent-color: #ec4899;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header stylisé */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Navigation moderne */
+        nav {
+            background: var(--card-bg);
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Cards stylisées */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.6s ease-out;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Dashboard grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Compteur de visiteurs stylisé */
+        .visitor-counter {
+            font-size: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Formulaires modernes */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Boutons stylisés */
+        button {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Stats cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Liste des incidents */
+        .incident-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .incident-item:hover {
+            transform: translateX(5px);
+        }
+
+        /* Badges et statuts */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            background: var(--card-bg);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    
+    <header>
+        <h1>🏛️ Système de Gestion du Musée</h1>
+        <p>Une expérience culturelle unique</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#" onclick="showSection('dashboard')"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
+            <li><a href="#" onclick="showSection('visitors')"><i class="fas fa-users"></i> Visiteurs</a></li>
+            <li><a href="#" onclick="showSection('incidents')"><i class="fas fa-exclamation-triangle"></i> Incidents</a></li>
+            <li><a href="#" onclick="showSection('stats')"><i class="fas fa-chart-bar"></i> Statistiques</a></li>
+            <li><a href="index1.html" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Section Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <div class="card">
+                <h2>👥 Visiteurs actuels</h2>
+                <div class="visitor-counter">
+                    <span id="currentVisitors">0</span>/50
+                </div>
+            </div>
+            <div class="card">
+                <h2>🎨 Exposition Permanente</h2>
+                <p>Visiteurs : <span id="permanentCount">0</span></p>
+            </div>
+            <div class="card">
+                <h2>✨ Exposition Temporaire</h2>
+                <p>Visiteurs : <span id="temporaryCount">0</span></p>
+            </div>
+        </div>
+
+        <!-- Section Visiteurs -->
+        <div id="visitors" class="card" style="display: none;">
+            <h2>🎟️ Gestion des Visiteurs</h2>
+            <form onsubmit="return addVisitor(event)">
+                <div class="form-group">
+                    <label>Type de billet :</label>
+                    <select id="ticketType" required>
+                        <option value="permanent">🎨 Exposition Permanente</option>
+                        <option value="temporary">✨ Exposition Temporaire</option>
+                        <option value="both">🌟 Les deux expositions</option>
+                    </select>
+                </div>
+                <button type="submit"><i class="fas fa-plus-circle"></i> Enregistrer l'entrée</button>
+            </form>
+            <div class="visitor-list animate-list" id="visitorList"></div>
+        </div>
+
+        <!-- Section Incidents -->
+        <div id="incidents" style="display: none;">
+            <div class="card">
+                <h2>⚠️ Signalement d'Incident</h2>
+                <form onsubmit="return reportIncident(event)">
+                    <div class="form-group">
+                        <label for="incidentType">Type d'incident :</label>
+                        <select id="incidentType" required>
+                            <option value="technical">🔧 Problème technique</option>
+                            <option value="security">🚨 Problème de sécurité</option>
+                            <option value="other">📝 Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="incidentDescription">Description :</label>
+                        <textarea id="incidentDescription" required></textarea>
+                    </div>
+                    <button type="submit"><i class="fas fa-exclamation-circle"></i> Signaler l'incident</button>
+                </form>
+            </div>
+            <div class="incident-list animate-list" id="incidentList"></div>
+        </div>
+
+        <!-- Section Statistiques -->
+        <div id="stats" style="display: none;">
+            <div class="card">
+                <h2>📊 Statistiques Journalières</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>🎨 Exposition Permanente</h3>
+                        <p><span id="permanentStats">0</span>%</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>✨ Exposition Temporaire</h3>
+                        <p><span id="temporaryStats">0</span>%</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>🌟 Les deux expositions</h3>
+                        <p><span id="bothStats">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentVisitors = 0;
+        let visitors = [];
+        let incidents = [];
+
+        // Fonction de déconnexion
+        function logout() {
+            window.location.href = 'login.html';
+        }
+
+        // Gestion de l'affichage des sections
+        function hideAllSections() {
+            ['dashboard', 'visitors', 'incidents', 'stats'].forEach(section => {
+                document.getElementById(section).style.display = 'none';
+            });
+        }
+
+        function showSection(sectionId) {
+            hideAllSections();
+            const section = document.getElementById(sectionId);
+            section.style.display = 'block';
+            section.style.animation = 'fadeIn 0.5s ease-out';
+            updateDisplay();
+        }
+
+        // Gestion des visiteurs
+        function addVisitor(event) {
+            event.preventDefault();
+            if (currentVisitors >= 50) {
+                showNotification('⚠️ Le musée est complet. Veuillez patienter.', 'warning');
+                return false;
+            }
+
+            const ticketType = document.getElementById('ticketType').value;
+            const visitor = {
+                id: Date.now(),
+                ticketType: ticketType,
+                entryTime: new Date(),
+                exitTime: null
+            };
+
+            visitors.push(visitor);
+            currentVisitors++;
+            showNotification('✅ Nouveau visiteur enregistré !', 'success');
+            updateDisplay();
+            return false;
+        }
+
+            // Mise à jour de l'affichage
+    function updateDisplay() {
+        document.getElementById('currentVisitors').textContent = currentVisitors;
+        document.getElementById('visitorList').innerHTML = visitors.map(visitor => `
+            <div class="incident-item">
+                <p>🎟️ Billet : ${visitor.ticketType}</p>
+                <button onclick="removeVisitor(${visitor.id})">🚪 Sortie</button>
+            </div>
+        `).join('');
+    }
+
+    // Gestion des incidents
+    function reportIncident(event) {
+        event.preventDefault();
+        const incidentType = document.getElementById('incidentType').value;
+        const incidentDescription = document.getElementById('incidentDescription').value;
+
+        const incident = {
+            id: Date.now(),
+            type: incidentType,
+            description: incidentDescription,
+            reportedAt: new Date()
+        };
+
+        incidents.push(incident);
+        showNotification('⚠️ Incident signalé !', 'warning');
+        updateIncidentList();
+        return false;
+    }
+
+    function updateIncidentList() {
+        document.getElementById('incidentList').innerHTML = incidents.map(incident => `
+            <div class="incident-item">
+                <p>${incident.type === 'technical' ? '🔧' : incident.type === 'security' ? '🚨' : '📝'} ${incident.description}</p>
+                <span class="badge ${incident.type === 'technical' ? 'badge-warning' : incident.type === 'security' ? 'badge-danger' : 'badge-success'}">${incident.type}</span>
+            </div>
+        `).join('');
+    }
+
+    // Affichage des notifications
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification');
+        notification.innerHTML = `<p>${message}</p>`;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+</script>
 </body>
 </html>
