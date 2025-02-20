@@ -1,8 +1,7 @@
 use projet_musée;
 create table exposition (
-id_exposition int  unsigned primary key not null auto_increment
-
-
+num_exposition int  unsigned primary key not null auto_increment,
+id_exposition int
 );
 
 create table visiteur (
@@ -15,6 +14,18 @@ mail varchar(50)
 );
 
 create table tickets (
-id_ticket int primary key not null,
-num_ticket int  unsigned not null auto_increment
+num_ticket int unsigned primary key not null auto_increment,
+id_ticket int  unsigned not null
+);
+
+create table visite (
+id_visite int  unsigned primary key not null auto_increment,
+id_visiteur int,
+id_exposition int,
+id_ticket int,
+h_arrivee datetime,
+h_depart datetime,
+constraint fk_visiteur foreign key (id_visiteur) references visiteur (id_visiteur),
+constraint fk_exposition foreign key (id_exposition) references exposition (id_exposition),
+constraint fk_ticket foreign key (id_ticket) references tickets (id_ticket)
 );
