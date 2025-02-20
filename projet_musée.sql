@@ -21,6 +21,7 @@ id_ticket int  unsigned not null
 create table incident (
 num_incident int unsigned primary key not null auto_increment,
 id_incident int  unsigned not null,
+description varchar(300),
 id_visiteur int,
 id_exposition int,
 id_ticket int,
