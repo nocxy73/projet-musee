@@ -1,4 +1,4 @@
-use projet_musée;
+use projet_musee;
 create table exposition (
 num_exposition int  unsigned primary key not null auto_increment,
 id_exposition int
