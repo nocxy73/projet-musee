@@ -19,18 +19,6 @@ num_ticket int unsigned primary key not null auto_increment,
 id_ticket int  unsigned not null
 );
 
-create table incident (
-num_incident int unsigned primary key not null auto_increment,
-id_incident int  unsigned not null,
-description varchar(300),
-id_visiteur int,
-id_exposition int,
-id_ticket int,
-constraint fk_visiteur foreign key (id_visiteur) references visiteur (id_visiteur),
-constraint fk_exposition foreign key (id_exposition) references exposition (id_exposition),
-constraint fk_ticket foreign key (id_ticket) references tickets (id_ticket)
-);
-
 create table visite (
 id_visite int  unsigned primary key not null auto_increment,
 id_visiteur int,
