@@ -71,3 +71,4 @@ INSERT INTO permettre (id_ticket, id_exposition) VALUES
 (2, 2), -- Ticket temporaire permet d'accéder à l'expo temporaire
 (3, 1), -- Ticket combiné permet d'accéder à l'expo permanente
 (3, 2); -- Ticket combiné permet d'accéder à l'expo temporaire
+
