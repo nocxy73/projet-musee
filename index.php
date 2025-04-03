@@ -16,6 +16,11 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
+// Fonction pour valider et assainir les entrées utilisateur
+function validateInput($data) {
+    return htmlspecialchars(trim($data));
+}
+
 // Fonction pour compter les visiteurs par type d'exposition
 function getVisitorsCount($pdo, $expositionType) {
     $query = "
@@ -47,37 +52,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
             
+            // Validation des données
+            $nom = validateInput($_POST['nom']);
+            $prenom = validateInput($_POST['prenom']);
+            $age = (int)$_POST['age'];
+            $mail = validateInput($_POST['mail']);
+            $tel = validateInput($_POST['tel']);
+            
             // Vérifier si le visiteur existe déjà
             $stmt = $pdo->prepare("SELECT id_visiteur FROM Visiteur WHERE mail = :mail AND h_depart IS NULL");
-            $stmt->execute(['mail' => $_POST['mail']]);
+            $stmt->execute(['mail' => $mail]);
             if ($stmt->fetch()) {
                 throw new Exception("Un visiteur avec cet email est déjà présent dans le musée.");
             }
             
             // Ajouter le visiteur
             $stmt = $pdo->prepare("INSERT INTO Visiteur (nom, prenom, age, mail, tel, h_arrivee) VALUES (:nom, :prenom, :age, :mail, :tel, NOW())");
-            $stmt->execute([
-                'nom' => $_POST['nom'],
-                'prenom' => $_POST['prenom'],
-                'age' => $_POST['age'],
-                'mail' => $_POST['mail'],
-                'tel' => $_POST['tel']
-            ]);
+            $stmt->execute(['nom' => $nom, 'prenom' => $prenom, 'age' => $age, 'mail' => $mail, 'tel' => $tel]);
             
-            $id_visiteur = $pdo->lastInsertId();
-            
-            // Associer le visiteur à une exposition (si nécessaire)
+            // Associer le visiteur à une exposition
             if (isset($_POST['exposition'])) {
                 $stmt = $pdo->prepare("INSERT INTO Visite (id_visiteur, id_exposition) VALUES (:id_visiteur, :id_exposition)");
-                $stmt->execute([
-                    'id_visiteur' => $id_visiteur,
-                    'id_exposition' => $_POST['exposition']
-                ]);
+                $stmt->execute(['id_visiteur' => $pdo->lastInsertId(), 'id_exposition' => $_POST['exposition']]);
             }
             
             $pdo->commit();
             echo "<div class='success-message'>Visiteur ajouté avec succès !</div>";
-            
         } catch (Exception $e) {
             $pdo->rollBack();
             echo "<div class='error-message'>Erreur : " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['delete_visitor'])) {
         try {
             $pdo->beginTransaction();
-            $id_visiteur = $_POST['id_visiteur'];
+            $id_visiteur = (int)$_POST['id_visiteur'];
             
             // Supprimer le visiteur
             $stmt = $pdo->prepare("DELETE FROM Visiteur WHERE id_visiteur = :id_visiteur");
@@ -93,7 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $pdo->commit();
             echo "<div class='success-message'>Visiteur supprimé avec succès !</div>";
-            
         } catch (Exception $e) {
             $pdo->rollBack();
             echo "<div class='error-message'>Erreur lors de la suppression : " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -156,7 +155,7 @@ $date = (new DateTime())->format('d/m/Y');
                 <h3>✨ Exposition Temporaire</h3>
                 <p class="visitor-count"><?php echo $visiteursTemporaire; ?> / 50</p>
                 <div class="progress-bar">
-                    <div class="progress" style="width: <?php echo ($visiteursTemporaire / 25) * 50; ?>%;"></div>
+                    <div class="progress" style="width: <?php echo ($visiteursTemporaire / 25) * 100; ?>%;"></div>
                 </div>
             </div>
         </div>
@@ -272,77 +271,78 @@ $date = (new DateTime())->format('d/m/Y');
                 echo "<p>" . $percentage . "%</p>";
                 echo "</div>";
             }
-            ?>           
-
+            ?>    
         </div>
 
         <h3>Fréquentation hebdomadaire</h3>
-<canvas id="weeklyChart"></canvas>
-</section>
+        <canvas id="weeklyChart"></canvas>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const ctx = document.getElementById('weeklyChart').getContext('2d');
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
 
-// Récupérer la fréquentation hebdomadaire
-const weeklyData = <?php
-$weeklyData = [];
-$stmt = $pdo->query("
-    SELECT DAYOFWEEK(date_visite) AS day, COUNT(*) AS count
-    FROM Visite
-    WHERE date_visite >= CURDATE() - INTERVAL 7 DAY
-    GROUP BY day
-    ORDER BY day
-");
+    // Récupérer la fréquentation hebdomadaire
+    const weeklyData = <?php
+    $weeklyData = [];
+    $stmt = $pdo->query("
+        SELECT DATE(date_visite) AS visit_date, COUNT(*) AS count
+        FROM Visite
+        WHERE date_visite >= CURDATE() - INTERVAL 7 DAY
+        GROUP BY visit_date
+        ORDER BY visit_date
+    ");
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $weeklyData[$row['day']] = $row['count'];
-}
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $dayOfWeek = date('N', strtotime($row['visit_date'])); // 1 (Lundi) à 7 (Dimanche)
+        $weeklyData[$dayOfWeek] = ($weeklyData[$dayOfWeek] ?? 0) + $row['count'];
+    }
 
-// Remplir les données pour le graphique
-$data = [];
-for ($i = 1; $i <= 7; $i++) {
-    $data[] = $weeklyData[$i] ?? 0; // 0 si pas de données pour ce jour
-}
-echo json_encode($data);
-?>;
+    // Remplir les données pour le graphique
+    $data = [];
+    for ($i = 1; $i <= 7; $i++) {
+        $data[] = $weeklyData[$i] ?? 0; // 0 si pas de données pour ce jour
+    }
+    echo json_encode($data);
+    ?>;
 
-const weeklyChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
-        datasets: [{
-            label: 'Nombre de visiteurs',
-            data: weeklyData, // Utiliser les données récupérées
-            backgroundColor: 'rgba(99, 102, 241, 0.7)',
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
+    const weeklyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+            datasets: [{
+                label: 'Nombre de visiteurs',
+                data: weeklyData, // Utiliser les données récupérées
+                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: '#f1f5f9'
-                },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                }
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
             },
-            x: {
-                ticks: {
-                    color: '#f1f5f9'
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1, // Compter de 1 en 1
+                        color: '#f1f5f9'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
                 },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
+                x: {
+                    ticks: {
+                        color: '#f1f5f9'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
                 }
             }
         }
-    }
-});
-</script>
+    });
+    </script>
 </body>
 </html>
