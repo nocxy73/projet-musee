@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 // Connexion à la base de données
 $host = 'localhost';
-$dbname = 'musee_db';
+$dbname = 'musee_db'; // Assurez-vous que le nom de la base de données est correct
 $username = 'root';
 $password = '';
 
@@ -19,11 +19,11 @@ try {
 // Fonction pour compter les visiteurs par type d'exposition
 function getVisitorsCount($pdo, $expositionType) {
     $query = "SELECT COUNT(DISTINCT v.id_visiteur) as count 
-              FROM Visiteur v 
-              JOIN Acheter a ON v.id_visiteur = a.id_visiteur 
-              JOIN Type_Ticket t ON a.id_ticket = t.id_ticket 
-              WHERE v.h_depart IS NULL 
-              AND (t.libelle = :type OR t.libelle = 'Les deux expositions')";
+    FROM Visiteur v 
+    JOIN Acheter a ON v.id_visiteur = a.id_visiteur 
+    JOIN Type_Ticket t ON a.id_ticket = t.id_ticket 
+    WHERE v.h_depart IS NULL 
+    AND (t.libelle = :type OR t.libelle = 'Les deux expositions')";
     
     try {
         $stmt = $pdo->prepare($query);
@@ -231,13 +231,13 @@ $date = (new DateTime())->format('d/m/Y');
         <div class="visitors-list">
             <?php
             $stmt = $pdo->query("
-                SELECT v.id_visiteur, v.nom, v.prenom, v.age, v.mail, v.tel, v.h_arrivee, 
-                       t.libelle AS type_billet
-                FROM Visiteur v
-                JOIN Acheter a ON v.id_visiteur = a.id_visiteur
-                JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
-                WHERE v.h_depart IS NULL
-                ORDER BY v.h_arrivee DESC
+            SELECT v.id_visiteur, v.nom, v.prenom, v.age, v.mail, v.tel, v.h_arrivee, 
+            t.libelle AS type_billet
+            FROM Visiteur v
+            JOIN Acheter a ON v.id_visiteur = a.id_visiteur
+            JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
+            WHERE v.h_depart IS NULL
+            ORDER BY v.h_arrivee DESC
             ");
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -266,12 +266,12 @@ $date = (new DateTime())->format('d/m/Y');
             <?php
             // Calculer les statistiques
             $stmt = $pdo->query("
-                SELECT t.libelle, COUNT(*) as count
-                FROM Acheter a
-                JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
-                JOIN Visiteur v ON a.id_visiteur = v.id_visiteur
-                WHERE v.h_depart IS NULL
-                GROUP BY t.libelle
+            SELECT t.libelle, COUNT(*) as count
+            FROM Acheter a
+            JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
+            JOIN Visiteur v ON a.id_visiteur = v.id_visiteur
+            WHERE v.h_depart IS NULL
+            GROUP BY t.libelle
             ");
             
             $total = 0;
@@ -297,43 +297,43 @@ $date = (new DateTime())->format('d/m/Y');
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('weeklyChart').getContext('2d');
-        const weeklyChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
-                datasets: [{
-                    label: 'Nombre de visiteurs',
-                    data: [0, 0, 0, 0, 0, 0, 0], // Données vides par défaut
-                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                }]
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    const weeklyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+            datasets: [{
+                label: 'Nombre de visiteurs',
+                data: [0, 0, 0, 0, 0, 0, 0], // Données vides par défaut
+                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: '#f1f5f9'
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#f1f5f9'
                     },
-                    x: {
-                        ticks: {
-                            color: '#f1f5f9'
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#f1f5f9'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
                     }
                 }
             }
-        });
+        }
+    });
     </script>
 </body>
 </html>
