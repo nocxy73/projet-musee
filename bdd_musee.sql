@@ -24,7 +24,7 @@ CREATE TABLE Visiteur (
 -- Table Type_Ticket
 CREATE TABLE Type_Ticket (
     id_ticket INT AUTO_INCREMENT PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL
+    libelle VARCHAR(50) NOT NULL,
     FOREIGN KEY (id_ticket) REFERENCES Exposition(id_exposition) ON DELETE CASCADE,
     FOREIGN KEY (id_ticket) REFERENCES Visiteur(id_visiteur) ON DELETE CASCADE
 );
@@ -33,6 +33,6 @@ CREATE TABLE Type_Ticket (
 CREATE TABLE Visite (
     id_exposition INT,
     id_visiteur INT,
-    PRIMARY KEY (id_exposition, id_visiteur)
+    PRIMARY KEY (id_exposition, id_visiteur),
     FOREIGN KEY (id_exposition ) REFERENCES Visiteur(id_visiteur) ON DELETE CASCADE
 );
