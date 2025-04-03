@@ -36,6 +36,8 @@ function getVisitorsCount($pdo, $expositionType) {
     }
 }
 
+// test test
+
 // Récupérer le nombre de visiteurs pour chaque exposition
 $visiteursPermanent = getVisitorsCount($pdo, 'Exposition Permanente');
 $visiteursTemporaire = getVisitorsCount($pdo, 'Exposition Temporaire');
