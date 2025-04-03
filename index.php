@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 // Connexion à la base de données
 $host = 'localhost';
-$dbname = 'musee_db'; // Assurez-vous que le nom de la base de données est correct
+$dbname = 'musee'; // Assurez-vous que le nom de la base de données est correct
 $username = 'root';
 $password = '';
 
