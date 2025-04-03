@@ -1,74 +1,73 @@
--- Création de la base de données du musée
+-- Création de la base de données
 CREATE DATABASE IF NOT EXISTS musee_db;
 USE musee_db;
 
--- Table des expositions
-CREATE TABLE exposition (
+-- Table Exposition
+CREATE TABLE Exposition (
     id_exposition INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(255) NOT NULL,
-    descriptif TEXT
+    descriptif TEXT NOT NULL
 );
 
--- Table des visiteurs
-CREATE TABLE visiteur (
+-- Table Visiteur
+CREATE TABLE Visiteur (
     id_visiteur INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(100),
-    prenom VARCHAR(100),
-    age INT,
-    tel VARCHAR(20),
-    mail VARCHAR(100)
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    age INT NOT NULL,
+    mail VARCHAR(100) NOT NULL,
+    tel VARCHAR(20) NOT NULL,
+    h_depart DATETIME,
+    h_arrivee DATETIME NOT NULL
 );
 
--- Table des types de tickets
-CREATE TABLE type_ticket (
+-- Table Type_Ticket
+CREATE TABLE Type_Ticket (
     id_ticket INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(50) NOT NULL
 );
 
--- Table des visites (relation visiteur-exposition)
-CREATE TABLE visiter (
-    id_visiteur INT,
+-- Table Permettre (association entre Exposition et Type_Ticket)
+CREATE TABLE Permettre (
     id_exposition INT,
-    h_arrivee DATETIME NOT NULL,
-    h_depart DATETIME,
-    PRIMARY KEY (id_visiteur, id_exposition, h_arrivee),
-    FOREIGN KEY (id_visiteur) REFERENCES visiteur(id_visiteur),
-    FOREIGN KEY (id_exposition) REFERENCES exposition(id_exposition)
-);
-
--- Table permettant de savoir quel type de ticket permet d'accéder à quelle exposition
-CREATE TABLE permettre (
     id_ticket INT,
-    id_exposition INT,
-    PRIMARY KEY (id_ticket, id_exposition),
-    FOREIGN KEY (id_ticket) REFERENCES type_ticket(id_ticket),
-    FOREIGN KEY (id_exposition) REFERENCES exposition(id_exposition)
+    PRIMARY KEY (id_exposition, id_ticket),
+    FOREIGN KEY (id_exposition) REFERENCES Exposition(id_exposition) ON DELETE CASCADE,
+    FOREIGN KEY (id_ticket) REFERENCES Type_Ticket(id_ticket) ON DELETE CASCADE
 );
 
--- Table des achats de tickets par les visiteurs
-CREATE TABLE acheter (
+-- Table Acheter (association entre Visiteur et Type_Ticket)
+CREATE TABLE Acheter (
     id_visiteur INT,
     id_ticket INT,
-    date_achat DATETIME NOT NULL,
-    PRIMARY KEY (id_visiteur, id_ticket, date_achat),
-    FOREIGN KEY (id_visiteur) REFERENCES visiteur(id_visiteur),
-    FOREIGN KEY (id_ticket) REFERENCES type_ticket(id_ticket)
+    PRIMARY KEY (id_visiteur, id_ticket),
+    FOREIGN KEY (id_visiteur) REFERENCES Visiteur(id_visiteur) ON DELETE CASCADE,
+    FOREIGN KEY (id_ticket) REFERENCES Type_Ticket(id_ticket) ON DELETE CASCADE
 );
 
--- Insertion des données initiales
-INSERT INTO exposition (libelle, descriptif) VALUES 
+-- Insertion de données initiales pour tester
+INSERT INTO Exposition (libelle, descriptif) VALUES 
 ('Exposition Permanente', 'Collection permanente du musée'),
 ('Exposition Temporaire', 'Exposition spéciale limitée dans le temps');
 
-INSERT INTO type_ticket (libelle) VALUES 
+INSERT INTO Type_Ticket (libelle) VALUES 
 ('Exposition Permanente'),
 ('Exposition Temporaire'),
 ('Les deux expositions');
 
--- Association des tickets aux expositions
-INSERT INTO permettre (id_ticket, id_exposition) VALUES 
-(1, 1), -- Ticket permanent permet d'accéder à l'expo permanente
-(2, 2), -- Ticket temporaire permet d'accéder à l'expo temporaire
-(3, 1), -- Ticket combiné permet d'accéder à l'expo permanente
-(3, 2); -- Ticket combiné permet d'accéder à l'expo temporaire
+INSERT INTO Visiteur (nom, prenom, age, mail, tel, h_depart, h_arrivee) VALUES
+('Dupont', 'Jean', 30, 'jean.dupont@example.com', '0601020304', '2023-10-01 15:00:00', '2023-10-01 13:00:00');
 
+INSERT INTO Acheter (id_visiteur, id_ticket) VALUES
+(1, 1),
+(1, 2);
+
+INSERT INTO Permettre (id_exposition, id_ticket) VALUES
+(1, 1),
+(2, 2),
+(1, 3),
+(2, 3);
+
+
+ALTER TABLE Visiteur ADD COLUMN h_arrivee DATETIME;
+DESCRIBE Visiteur;
