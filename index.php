@@ -111,7 +111,7 @@ $date = (new DateTime())->format('d/m/Y');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Système de Gestion du Musée</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">   
 </head>
 <body>
     <header class="header">
