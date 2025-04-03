@@ -18,13 +18,14 @@ try {
 
 // Fonction pour compter les visiteurs par type d'exposition
 function getVisitorsCount($pdo, $expositionType) {
-    $query = "SELECT COUNT(DISTINCT v.id_visiteur) as count 
+    $query = "
+    SELECT COUNT(DISTINCT v.id_visiteur) as count 
     FROM Visiteur v 
-    JOIN Acheter a ON v.id_visiteur = a.id_visiteur 
-    JOIN Type_Ticket t ON a.id_ticket = t.id_ticket 
+    JOIN Visite vi ON v.id_visiteur = vi.id_visiteur 
+    JOIN Exposition e ON vi.id_exposition = e.id_exposition 
     WHERE v.h_depart IS NULL 
-    AND (t.libelle = :type OR t.libelle = 'Les deux expositions')";
-    
+    AND e.titre = :type";
+
     try {
         $stmt = $pdo->prepare($query);
         $stmt->execute(['type' => $expositionType]);
@@ -35,8 +36,6 @@ function getVisitorsCount($pdo, $expositionType) {
         return 0;
     }
 }
-
-// test test
 
 // Récupérer le nombre de visiteurs pour chaque exposition
 $visiteursPermanent = getVisitorsCount($pdo, 'Exposition Permanente');
@@ -67,19 +66,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $id_visiteur = $pdo->lastInsertId();
             
-            // Associer le visiteur au type de billet
-            $stmt = $pdo->prepare("INSERT INTO Acheter (id_visiteur, id_ticket) VALUES (:id_visiteur, :id_ticket)");
-            $stmt->execute([
-                'id_visiteur' => $id_visiteur,
-                'id_ticket' => $_POST['ticket']
-            ]);
+            // Associer le visiteur à une exposition (si nécessaire)
+            if (isset($_POST['exposition'])) {
+                $stmt = $pdo->prepare("INSERT INTO Visite (id_visiteur, id_exposition) VALUES (:id_visiteur, :id_exposition)");
+                $stmt->execute([
+                    'id_visiteur' => $id_visiteur,
+                    'id_exposition' => $_POST['exposition']
+                ]);
+            }
             
             $pdo->commit();
             echo "<div class='success-message'>Visiteur ajouté avec succès !</div>";
-            
-            // Mettre à jour les compteurs
-            $visiteursPermanent = getVisitorsCount($pdo, 'Exposition Permanente');
-            $visiteursTemporaire = getVisitorsCount($pdo, 'Exposition Temporaire');
             
         } catch (Exception $e) {
             $pdo->rollBack();
@@ -90,20 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
             $id_visiteur = $_POST['id_visiteur'];
             
-            // Supprimer d'abord les enregistrements dans la table Acheter
-            $stmt = $pdo->prepare("DELETE FROM Acheter WHERE id_visiteur = :id_visiteur");
-            $stmt->execute(['id_visiteur' => $id_visiteur]);
-            
-            // Ensuite supprimer le visiteur
+            // Supprimer le visiteur
             $stmt = $pdo->prepare("DELETE FROM Visiteur WHERE id_visiteur = :id_visiteur");
             $stmt->execute(['id_visiteur' => $id_visiteur]);
             
             $pdo->commit();
             echo "<div class='success-message'>Visiteur supprimé avec succès !</div>";
-            
-            // Mettre à jour les compteurs
-            $visiteursPermanent = getVisitorsCount($pdo, 'Exposition Permanente');
-            $visiteursTemporaire = getVisitorsCount($pdo, 'Exposition Temporaire');
             
         } catch (Exception $e) {
             $pdo->rollBack();
@@ -218,11 +207,10 @@ $date = (new DateTime())->format('d/m/Y');
             </div>
             
             <div class="form-group">
-                <label for="ticket">Type de billet :</label>
-                <select name="ticket" id="ticket" required>
+                <label for="exposition">Exposition :</label>
+                <select name="exposition" id="exposition" required>
                     <option value="1">Exposition Permanente</option>
                     <option value="2">Exposition Temporaire</option>
-                    <option value="3">Les deux expositions</option>
                 </select>
             </div>
             
@@ -233,25 +221,19 @@ $date = (new DateTime())->format('d/m/Y');
         <div class="visitors-list">
             <?php
             $stmt = $pdo->query("
-            SELECT v.id_visiteur, v.nom, v.prenom, v.age, v.mail, v.tel, v.h_arrivee, 
-            t.libelle AS type_billet
-            FROM Visiteur v
-            JOIN Acheter a ON v.id_visiteur = a.id_visiteur
-            JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
-            WHERE v.h_depart IS NULL
+            SELECT v.id_visiteur, v.nom, v.prenom, v.age, v.mail, v.tel, v.h_arrivee 
+            FROM Visiteur v 
+            WHERE v.h_depart IS NULL 
             ORDER BY v.h_arrivee DESC
             ");
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 echo "<div class='visitor-card'>";
-                echo "<div class='visitor-info'>";
                 echo "<p><strong>Nom :</strong> " . htmlspecialchars($row['nom']) . " " . htmlspecialchars($row['prenom']) . "</p>";
                 echo "<p><strong>Âge :</strong> " . htmlspecialchars($row['age']) . " ans</p>";
                 echo "<p><strong>Email :</strong> " . htmlspecialchars($row['mail']) . "</p>";
                 echo "<p><strong>Téléphone :</strong> " . htmlspecialchars($row['tel']) . "</p>";
-                echo "<p><strong>Type de billet :</strong> " . htmlspecialchars($row['type_billet']) . "</p>";
                 echo "<p><strong>Heure d'arrivée :</strong> " . date('H:i', strtotime($row['h_arrivee'])) . "</p>";
-                echo "</div>";
                 echo "<form method='POST' class='delete-form'>";
                 echo "<input type='hidden' name='id_visiteur' value='" . htmlspecialchars($row['id_visiteur']) . "'>";
                 echo "<button type='submit' name='delete_visitor' class='delete-btn'>Supprimer</button>";
@@ -268,18 +250,18 @@ $date = (new DateTime())->format('d/m/Y');
             <?php
             // Calculer les statistiques
             $stmt = $pdo->query("
-            SELECT t.libelle, COUNT(*) as count
-            FROM Acheter a
-            JOIN Type_Ticket t ON a.id_ticket = t.id_ticket
-            JOIN Visiteur v ON a.id_visiteur = v.id_visiteur
+            SELECT e.titre, COUNT(vi.id_visiteur) as count
+            FROM Visite vi
+            JOIN Exposition e ON vi.id_exposition = e.id_exposition
+            JOIN Visiteur v ON vi.id_visiteur = v.id_visiteur
             WHERE v.h_depart IS NULL
-            GROUP BY t.libelle
+            GROUP BY e.titre
             ");
             
             $total = 0;
             $stats = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $stats[$row['libelle']] = $row['count'];
+                $stats[$row['titre']] = $row['count'];
                 $total += $row['count'];
             }
             
