@@ -272,52 +272,77 @@ $date = (new DateTime())->format('d/m/Y');
                 echo "<p>" . $percentage . "%</p>";
                 echo "</div>";
             }
-            ?>
+            ?>           
+
         </div>
 
         <h3>Fréquentation hebdomadaire</h3>
-        <canvas id="weeklyChart"></canvas>
-    </section>
+<canvas id="weeklyChart"></canvas>
+</section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    const ctx = document.getElementById('weeklyChart').getContext('2d');
-    const weeklyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
-            datasets: [{
-                label: 'Nombre de visiteurs',
-                data: [0, 0, 0, 0, 0, 0, 0], // Données vides par défaut
-                backgroundColor: 'rgba(99, 102, 241, 0.7)',
-            }]
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('weeklyChart').getContext('2d');
+
+// Récupérer la fréquentation hebdomadaire
+const weeklyData = <?php
+$weeklyData = [];
+$stmt = $pdo->query("
+    SELECT DAYOFWEEK(date_visite) AS day, COUNT(*) AS count
+    FROM Visite
+    WHERE date_visite >= CURDATE() - INTERVAL 7 DAY
+    GROUP BY day
+    ORDER BY day
+");
+
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $weeklyData[$row['day']] = $row['count'];
+}
+
+// Remplir les données pour le graphique
+$data = [];
+for ($i = 1; $i <= 7; $i++) {
+    $data[] = $weeklyData[$i] ?? 0; // 0 si pas de données pour ce jour
+}
+echo json_encode($data);
+?>;
+
+const weeklyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+        datasets: [{
+            label: 'Nombre de visiteurs',
+            data: weeklyData, // Utiliser les données récupérées
+            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#f1f5f9'
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    }
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#f1f5f9'
                 },
-                x: {
-                    ticks: {
-                        color: '#f1f5f9'
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    }
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#f1f5f9'
+                },
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
                 }
             }
         }
-    });
-    </script>
+    }
+});
+</script>
 </body>
 </html>
