@@ -1,5 +1,3 @@
-CREATE DATABASE musee;
-
 USE musee;
 
 -- Table pour les types de billets
@@ -20,6 +18,8 @@ CREATE TABLE Visiteur (
     h_depart DATETIME
 );
 
+ALTER TABLE Exposition ADD COLUMN image VARCHAR(255);
+
 -- Table pour les expositions
 CREATE TABLE Exposition (
     id_exposition INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,3 +38,4 @@ CREATE TABLE Visite (
     FOREIGN KEY (id_exposition) REFERENCES Exposition(id_exposition),
     date_visite DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
