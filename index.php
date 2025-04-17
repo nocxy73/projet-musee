@@ -1277,7 +1277,7 @@
                     <span class="pill"><i class="fas fa-sync-alt"></i> Installation interactive</span>
                     <span class="pill"><i class="fas fa-users"></i> <span id="temporary-visitors">0</span> visiteurs</span>
                 </div>
-                <a href="#edit_exposition.php" class="edit-button" onclick="showToast('Modification de l\'exposition temporaire')">
+                <a href="edit_exposition.php" class="edit-button" onclick="showToast('Modification de l\'exposition temporaire')">
                     <i class="fas fa-edit"></i> Modifier l'Exposition
                 </a>
             </div>
@@ -1481,6 +1481,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        
         // Données de simulation
         const museumData = {
             maxCapacity: 50,
